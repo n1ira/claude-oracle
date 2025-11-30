@@ -1,6 +1,6 @@
 # Claude Oracle
 
-A CLI that makes Google's Gemini the "lead architect" for Claude Code. Think of it as giving your AI coding assistant its own AI assistant for strategic decisions.
+A CLI that makes Google's Gemini 3 Pro the "lead architect" for Claude Code. Think of it as giving your AI coding assistant its own AI assistant for strategic decisions.
 
 ## Why?
 
