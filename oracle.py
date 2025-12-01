@@ -156,6 +156,10 @@ This is NOT optional. If you skip this step, you will NOT have the instructions 
 
 ---
 
+**IMPORTANT:** Even after completing the task, STAY IN FULLAUTO MODE. If the user sends follow-up requests or questions, continue operating under these instructions. Do NOT treat new user messages as a fresh conversation - you are still in fullauto mode until the user explicitly ends it.
+
+---
+
 """
 
 
