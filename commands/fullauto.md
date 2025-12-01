@@ -55,70 +55,31 @@ First, you MUST update the project context. Do the following:
    - CLAUDE.md
    - Any architecture docs
 
-4. **Create/Update FULLAUTO_CONTEXT.md** using the template below. This file is CRITICAL - it survives conversation compactions and tells your future self everything needed to continue.
+4. **Create/Update FULLAUTO_CONTEXT.md** using this minimal template:
 
 ```markdown
 # FULLAUTO MODE ACTIVE
 
-> **READ THIS FIRST**: You are in FULLAUTO MODE. This file contains everything you need to continue working autonomously.
-
-## Instructions for Claude (post-compaction)
-
-You are operating in high-autonomy FULLAUTO MODE. Your job:
-1. Complete the user's task fully without stopping
-2. Consult the Gemini Oracle (`oracle ask`) for strategic decisions
-3. Update this file as you make progress
-4. Use `oracle history --clear` if Oracle seems confused
-5. Keep working through compactions until done
-
-**Oracle commands:**
-- `oracle ask "question"` - Strategic guidance
-- `oracle ask --files src/file.py "review"` - Code review
-- `oracle ask --image img.png "analyze"` - Image analysis
-- `oracle imagine "description"` - Generate images
-- `oracle quick "question"` - Quick answers (no history)
-- `oracle history --clear` - Reset Oracle context
-
-**Critical rules:**
-- NEVER stop without completing the task
-- Update todos frequently so user sees progress
-- Test as you go
-- If Oracle gives bad advice, clarify or use --no-history
-
----
+> **POST-COMPACTION RECOVERY**: If you just woke up from compaction, do this FIRST:
+> 1. Read `~/.claude/commands/fullauto.md` to reload full instructions
+> 2. Then continue from "Next Steps" below
 
 ## Current Task
-[USER'S ORIGINAL REQUEST HERE]
-
-## Project Overview
-[Brief description of what this project does]
-
-## Technology Stack
-- Languages: [list]
-- Frameworks: [list]
-- Key Dependencies: [list]
-
-## Current State
-- Branch: [current branch]
-- Recent Changes: [summary]
+[USER'S ORIGINAL REQUEST - copy exactly]
 
 ## Progress
-- [ ] Step 1: [description]
-- [ ] Step 2: [description]
 - [x] Completed: [what's done]
+- [ ] In progress: [current step]
+- [ ] Pending: [remaining steps]
 
-## Key Files
-[List of important files and their purposes]
-
-## Decisions Made
-[Important architectural/implementation decisions and why]
-
-## Blockers/Issues
-[Any problems encountered]
+## Key Context
+[Important decisions, blockers, relevant files - keep brief]
 
 ## Next Steps
-[What to do next - be specific so post-compaction Claude knows exactly where to pick up]
+[Specific next action - be precise so post-compaction Claude knows exactly what to do]
 ```
+
+**Keep it short.** The full instructions live in `~/.claude/commands/fullauto.md`. This file just tracks state.
 
 ---
 
@@ -208,13 +169,9 @@ When you believe the task is complete:
 
 ## HANDLING COMPACTION
 
-When you auto-compact, the next Claude instance will read FULLAUTO_CONTEXT.md automatically (it's in the project root). Make sure it always contains:
-- The full task description
-- Current progress with checkboxes
-- Specific next steps
-- Any important decisions or context
+When you auto-compact, the next Claude instance will read FULLAUTO_CONTEXT.md automatically. The header tells it to read this file (`~/.claude/commands/fullauto.md`) first to reload full instructions.
 
-The template above includes instructions at the top so post-compaction Claude immediately knows it's in FULLAUTO mode.
+Keep FULLAUTO_CONTEXT.md minimal - just task, progress, and next steps. Don't duplicate the instructions.
 
 ---
 
