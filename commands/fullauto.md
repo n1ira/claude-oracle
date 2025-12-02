@@ -36,17 +36,37 @@ $ARGUMENTS
 
 ## IMPORTANT: ORACLE LIMITATIONS
 
-**The Oracle only knows what you tell it.** Gemini does NOT have access to your codebase, files, or any context unless you explicitly provide it in your query. Previous exchanges do NOT retain file contents - if you attached a file in exchange #1, the Oracle cannot see it in exchange #3.
+**🚨 THE ORACLE HAS ZERO ACCESS TO YOUR CODE UNLESS YOU ATTACH IT 🚨**
 
-If you need the Oracle to review code or understand context, you MUST:
-- Use `--files` to attach relevant code in THAT specific request
-- Include key context directly in your query text
-- Don't assume it remembers details from previous exchanges
+Gemini does NOT have access to your codebase, files, or any context unless you explicitly provide it. The Oracle is **blind** to your implementation.
 
-**The Oracle has a 5 exchange context window** per project:
-- It remembers the last 5 query/response pairs (text only, not file contents)
-- Older exchanges are trimmed (Oracle sees: "⚠️ Older context removed for efficiency")
-- For long tasks, important context may be lost - use FULLAUTO_CONTEXT.md as the source of truth
+**Files are NOT persisted across queries:**
+- If you attached `src/model.py` in query #1, Oracle CANNOT see it in query #2
+- Files only consume tokens for that ONE query - they're not kept in history
+- **Therefore: Attach files liberally!** Don't be stingy with `--files` - there's no accumulating cost
+
+**You MUST attach files when:**
+- Asking about implementation details
+- Requesting code review or validation
+- Discussing architecture that exists in code
+- Asking "should I continue" during training (attach training logs/code)
+
+**Example - WRONG:**
+```bash
+oracle ask "Should I continue training? Metrics look bad"
+# Oracle has NO IDEA what your metrics are or what model you're training
+```
+
+**Example - CORRECT:**
+```bash
+oracle ask --files "train.py:1-50,logs/training.log" "Epoch 5/10, loss: 0.45, val_loss: 0.52. Should I continue or kill and adjust?"
+# Oracle can now see your code and actual metrics
+```
+
+**The Oracle has a 5 exchange text-only memory:**
+- Remembers last 5 query/response pairs (text only, no files)
+- Older exchanges trimmed - Oracle sees: "⚠️ Older context removed"
+- FULLAUTO_CONTEXT.md is your persistent memory (auto-sent with every query)
 
 **If the Oracle seems confused or gives irrelevant advice:**
 1. **Update FULLAUTO_CONTEXT.md** with clearer, more specific context about the current state
@@ -161,9 +181,9 @@ Work through each step from the Oracle's plan:
 1. **Before starting each major step**: Briefly consider if you need to seek Oracle guidance
 2. **Mark todos as in_progress/completed** as you work
 3. **Test as you go** - don't wait until the end
-4. **If you hit a decision point or obstacle**, consult the Oracle:
+4. **If you hit a decision point or obstacle**, consult the Oracle with relevant files:
    ```bash
-   oracle ask "I'm working on [step]. I've encountered [issue/decision]. What should I do?"
+   oracle ask --files src/relevant_file.py "I'm working on [step]. I've encountered [issue/decision]. What should I do?"
    ```
 
 ---
@@ -206,14 +226,10 @@ When you believe the task is complete:
 
 ## CRITICAL RULES FOR FULLAUTO MODE
 
-1. **NEVER stop without completing the task** - If you need to compact, leave clear notes in FULLAUTO_CONTEXT.md about current progress
-2. **Consult the Oracle throughout** - Not just at the start. Check in after completing major steps, when stuck, or before risky changes. Don't go more than 3-4 steps without Oracle contact. For long-running tasks (e.g., model training), periodically check progress and ask Oracle whether to continue or kill and adjust strategy.
-3. **Always update todos** - The user should be able to see your progress
-4. **Test rigorously** - Verify your work actually functions
-5. **Be efficient** - Parallelize where possible, don't waste tokens on unnecessary exploration
-6. **If the Oracle seems confused**, fix the context or clarify - Don't blindly follow bad advice
-7. **Document as you go** - Leave comments/notes for your future self (post-compaction)
-8. **Keep FULLAUTO_CONTEXT.md as source of truth** - The Oracle's memory is limited, the context file is permanent
+1. **Always update todos** - User should see your progress at all times
+2. **Test rigorously** - Verify your work actually functions
+3. **Be efficient** - Parallelize where possible, don't waste tokens
+4. **Document as you go** - Leave notes for your future self (post-compaction)
 
 ---
 
@@ -253,24 +269,6 @@ oracle imagine "Minimalist logo for trading platform" -o logo.png
 5. Total time: ~60-90 seconds, cost: ~$0.01/image
 
 Images saved to `~/.oracle/images/` by default.
-
----
-
-## HANDLING ORACLE CONFUSION
-
-The Oracle is incredibly smart but has limited context. If responses seem off:
-
-| Symptom | Solution |
-|---------|----------|
-| Oracle gives generic advice | Add more specific context to FULLAUTO_CONTEXT.md |
-| Oracle contradicts earlier guidance | Clear history: `oracle history --clear` then re-ask |
-| Oracle seems stuck on old context | Use `--no-history` flag for fresh perspective |
-| Oracle misunderstands the task | Reframe with explicit "Current situation is X, question is Y" |
-| Oracle asks for info you already provided | Info may have rotated out of 5-exchange window; repeat it |
-| Oracle can't validate without seeing code | Use `--files` to attach the actual implementation |
-| Token limit warning (200k) | Clear history, send smaller file sections, trim context file |
-| Large file warning (15k tokens) | Use line ranges: `--files "file.py:1-100,200-300"` |
-| Need visual context for UI/diagram | Use `--image` to attach screenshots or diagrams |
 
 ---
 
