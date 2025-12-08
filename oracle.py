@@ -838,13 +838,21 @@ def ask_oracle(
     log_debug(f"Mode: {mode}, Thinking: {thinking_level}", debug)
     log_debug(f"Query length: {len(query)} chars", debug)
 
-    # Check API key
+    # Check API key (allow VERTEX_API_KEY, OAuth, or traditional API keys)
     api_key = get_gemini_api_key()
-    if not api_key:
-        log_error("GEMINI_API_KEY or GOOGLE_API_KEY environment variable not set")
-        return {"error": "GEMINI_API_KEY or GOOGLE_API_KEY environment variable not set"}
+    vertex_key = os.environ.get("VERTEX_API_KEY")
+    oauth_creds = get_oauth_credentials(debug)
 
-    log_debug(f"API key found: {api_key[:8]}...{api_key[-4:]}", debug)
+    if not api_key and not vertex_key and not oauth_creds:
+        log_error("No authentication available. Set VERTEX_API_KEY, GEMINI_API_KEY, GOOGLE_API_KEY, or run 'oracle login'")
+        return {"error": "No authentication available. Set VERTEX_API_KEY, GEMINI_API_KEY, GOOGLE_API_KEY, or run 'oracle login'"}
+
+    if api_key:
+        log_debug(f"API key found: {api_key[:8]}...{api_key[-4:]}", debug)
+    elif vertex_key:
+        log_debug(f"Vertex API key found: {vertex_key[:8]}...{vertex_key[-4:]}", debug)
+    else:
+        log_debug("Using OAuth credentials", debug)
 
     # Track total tokens
     total_tokens = estimate_tokens(query)
@@ -1603,10 +1611,13 @@ def imagine(
     log_info("=== Oracle Imagine Started ===", debug)
     log_debug(f"Prompt: {prompt[:100]}...", debug)
 
-    # Check API key
+    # Check API key (allow VERTEX_API_KEY, OAuth, or traditional API keys)
     api_key = get_gemini_api_key()
-    if not api_key:
-        return (None, "GEMINI_API_KEY environment variable not set")
+    vertex_key = os.environ.get("VERTEX_API_KEY")
+    oauth_creds = get_oauth_credentials(debug)
+
+    if not api_key and not vertex_key and not oauth_creds:
+        return (None, "No authentication available. Set VERTEX_API_KEY, GEMINI_API_KEY, GOOGLE_API_KEY, or run 'oracle login'")
 
     # Pre-compute output path for potential Vast.ai fallback
     if output_path:
@@ -1726,10 +1737,14 @@ def quick_ask(query: str, debug: bool = False, no_history: bool = False) -> str:
     """Quick question without structured output - just get a text answer."""
     log_info("=== Quick Ask Started ===", debug)
 
+    # Check API key (allow VERTEX_API_KEY, OAuth, or traditional API keys)
     api_key = get_gemini_api_key()
-    if not api_key:
-        log_error("GEMINI_API_KEY not set")
-        return "ERROR: GEMINI_API_KEY not set"
+    vertex_key = os.environ.get("VERTEX_API_KEY")
+    oauth_creds = get_oauth_credentials(debug)
+
+    if not api_key and not vertex_key and not oauth_creds:
+        log_error("No authentication available. Set VERTEX_API_KEY, GEMINI_API_KEY, GOOGLE_API_KEY, or run 'oracle login'")
+        return "ERROR: No authentication available. Set VERTEX_API_KEY, GEMINI_API_KEY, GOOGLE_API_KEY, or run 'oracle login'"
 
     # Get project ID and history
     project_id = get_project_id(debug)
